@@ -6,30 +6,20 @@ use Moose;
 use namespace::autoclean;
 
 has 'username' => (
-    is      => 'ro',
-    isa     => 'Str',
-    writer  => 'set_username',
+    is          => 'ro',
+    isa         => 'Str',
+    writer      => 'set_username',
 );
 has 'state' => (
-    is      => 'ro',
-    isa     => 'Int',
-    writer  => 'set_state',
+    is          => 'ro',
+    isa         => 'Int',
+    writer      => 'set_state',
 );
 has 'states' => (
-    is      => 'rw',
-    isa     => 'HashRef',
+    is          => 'rw',
+    isa         => 'HashRef',
+    required    => 1,
 );
-
-around BUILDARGS => sub {
-    my $orig = shift;
-    my $class = shift;
-
-    if ( @_ == 1 && ref $_[0] eq 'HashRef' ) {
-        return $class->$orig( states => $_[0] );
-    } else {
-        return $class->$orig(@_);
-    }
-};
 
 sub process {
     my $self = shift;

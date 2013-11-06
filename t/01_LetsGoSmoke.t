@@ -17,7 +17,7 @@ has_attribute_ok( 'LetsGoSmoke', 'states', 'LetsGoSmoke has attribute "states"' 
 has_attribute_ok( 'LetsGoSmoke', 'username', 'LetsGoSmoke has attribute "username"' );
 has_attribute_ok( 'LetsGoSmoke', 'state', 'LetsGoSmoke has attribute "state"' );
 
-my $smoking = LetsGoSmoke->new( $config->get('states') );
+my $smoking = LetsGoSmoke->new( states => $config->get('states') );
 ok( $smoking->set_state(1), "Setting state" );
 is( $smoking->state, 1, "Atrribute state successefuly setted" );
 ok( $smoking->set_username('smoker'), "Setting username" );

@@ -2,21 +2,26 @@ package LetsGoSmoke;
 
 use version; our $VERSION = version->parse("0.01_00");
 
-use v5.14;
-
 use Moose;
 use namespace::autoclean;
 
-has 'username' => (
+has 'from' => (
     is          => 'ro',
     isa         => 'Str',
-    writer      => 'set_username',
-    clearer     => 'clear_username',
+    writer      => 'set_from',
+    clearer     => 'clear_from',
+);
+
+has 'to' => (
+    is          => 'ro',
+    isa         => 'ArrayRef',
+    writer      => 'set_to',
+    clearer     => 'clear_to',
 );
 
 has 'state' => (
     is          => 'ro',
-    isa         => 'Int',
+    isa         => 'HashRef',
     writer      => 'set_state',
     clearer     => 'clear_state',
 );
@@ -30,23 +35,35 @@ has 'config' => (
 sub process_request {
     my $self = shift;
 
-    given ( $self->config->{states}->{ $self->state } ) {
-        $self->available        when /^available$/;
-        $self->smoke_request    when /^smoke_request$/;
-        $self->smoke_approve    when /^smoke_approve$/;
-        $self->smoke_abort      when /^smoke_abort$/;
+    if ( exists $self->state->{status} ) {
+        status( $self->state->{status} );
+    }
+    elsif ( exists $self->state->{offer} ) {
+        offer( $self->state->{offer} );
+    }
+    elsif ( exists $self->state->{approve} ) {
+        approve( $self->state->{approve} );
+    }
+    else {
+        die "Wrong request";
     }
 }
 
-sub available {}
-sub smoke_request {}
-sub smoke_approve {}
-sub smoke_abort {}
+sub status {
+    my $self = shift;
+}
+sub offer {
+    my $self = shift;
+}
+sub approve {
+    my $self = shift;
+}
 
 sub clear_temp_vars {
     my $self = shift;
 
-    $self->clear_username;
+    $self->clear_from;
+    $self->clear_to;
     $self->clear_state;
 }
 

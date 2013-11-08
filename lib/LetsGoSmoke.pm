@@ -19,18 +19,25 @@ has 'to' => (
     clearer     => 'clear_to',
 );
 
-has 'state' => (
+has 'request' => (
     is          => 'ro',
     isa         => 'HashRef',
-    writer      => 'set_state',
-    clearer     => 'clear_state',
+    writer      => 'set_request',
+    clearer     => 'clear_request',
 );
 
 has 'config' => (
     is          => 'ro',
-    isa         => 'HashRef',
+    isa         => 'Config::JSON',
     required    => 1,
 );
+
+has 'hostPort' => {
+    is          => 'ro',
+    isa         => subtype( 'Str' => where { $_ =~ /^(\d{1,3}\.){3}\d{1,3}\:\d+$/ } ),
+    writer      => 'set_hostPort',
+    clearer     => 'clear_hostPort',
+}
 
 sub process_request {
     my $self = shift;
@@ -64,7 +71,8 @@ sub clear_temp_vars {
 
     $self->clear_from;
     $self->clear_to;
-    $self->clear_state;
+    $self->clear_request;
+    $self->clear_hostPort
 }
 
 __PACKAGE__->meta->make_immutable;

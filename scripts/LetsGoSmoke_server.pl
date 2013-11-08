@@ -14,7 +14,6 @@ use Data::Dumper;
 $| = 1;
 
 my $config = Config::JSON->new('t/LetsGoSmoke.conf');
-my %states = reverse %{ $config->get('states') };
 
 my $socket = IO::Socket::INET->new(
     LocalPort   => '5000',
@@ -24,7 +23,7 @@ my $socket = IO::Socket::INET->new(
     Listen      => 10,
 ) or die "Error in socket creation: $!\n";
 
-my $lets_go_smoke = LetsGoSmoke->new( states => \%states );
+my $letsGoSmoke = LetsGoSmoke->new( config => $config );
 
 while ( 1 ) {
     my $client_socket = $socket->accept();

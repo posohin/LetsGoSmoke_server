@@ -1,4 +1,4 @@
-package LetsGoSmoke::User;
+package LetsGoSmoke::Model::Offer;
 
 use Moose;
 use namespace::autoclean;

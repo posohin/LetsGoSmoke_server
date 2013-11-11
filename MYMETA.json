@@ -1,0 +1,36 @@
+{
+   "abstract" : "Server side of a LetsGoSmoke app",
+   "author" : [
+      "Nikita Posokhin (n.posohin@adriver.ru)"
+   ],
+   "dynamic_config" : 0,
+   "generated_by" : "Module::Build version 0.38, CPAN::Meta::Converter version 2.132510",
+   "license" : [
+      "open_source"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "LetsGoSmoke",
+   "prereqs" : {
+      "runtime" : {
+         "requires" : {
+            "Config::JSON" : "1.5100",
+            "Getopt::Long::Descriptive" : "0.096",
+            "IO::Socket::INET" : "1.31",
+            "JSON" : "2.90",
+            "Moose" : "2.1005",
+            "namespace::autoclean" : "0.14",
+            "perl" : "v5.14.2"
+         }
+      }
+   },
+   "release_status" : "testing",
+   "resources" : {
+      "license" : [
+         "http://opensource.org/licenses/gpl-license.php"
+      ]
+   },
+   "version" : "0.01_00"
+}

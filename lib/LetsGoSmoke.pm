@@ -5,39 +5,67 @@ use version; our $VERSION = version->parse("0.01_00");
 use Moose;
 use namespace::autoclean;
 
+use JSON;
+
 has 'from' => (
     is          => 'ro',
-    isa         => 'Str',
-    writer      => 'set_from',
-    clearer     => 'clear_from',
+    isa         => 'HashRef',
+    writer      => '_set_from',
+    clearer     => '_clear_from',
 );
 
 has 'to' => (
     is          => 'ro',
     isa         => 'ArrayRef',
-    writer      => 'set_to',
-    clearer     => 'clear_to',
+    writer      => '_set_to',
+    clearer     => '_clear_to',
 );
 
-has 'request' => (
+has 'message' => (
     is          => 'ro',
-    isa         => 'HashRef',
-    writer      => 'set_request',
-    clearer     => 'clear_request',
+    isa         => 'Str',
+    writer      => 'set_message',
+    clearer     => 'clear_message',
+);
+
+has 'dbClient' => (
+    is          => 'ro',
+    isa         => 'MongoDB::MongoClient',
+    writer      => '_set_dbClient',
+    lazy        => 1,
 );
 
 has 'config' => (
     is          => 'ro',
     isa         => 'Config::JSON',
     required    => 1,
+    lazy        => 1,
 );
 
-has 'hostPort' => {
+has 'controller' => (
     is          => 'ro',
-    isa         => subtype( 'Str' => where { $_ =~ /^(\d{1,3}\.){3}\d{1,3}\:\d+$/ } ),
-    writer      => 'set_hostPort',
-    clearer     => 'clear_hostPort',
+    isa         => 'LetsGoSmoke::BaseControlle'
+    writer      => '_set_controller',
+);
+
+sub processRequest {
+    #clear temp_var
+    #parse message
+    #send response message
 }
+
+sub parseRequestMessage {
+    #convert to hashref
+    #parse request type
+    #set request controller
+}
+
+sub _before_build {
+    #create MongoDB::MongoClient
+}
+
+
+
 
 sub process_request {
     my $self = shift;

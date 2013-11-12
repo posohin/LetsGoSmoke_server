@@ -9,11 +9,13 @@ use IO::Socket::INET;
 use JSON;
 use Getopt::Long::Descriptive;
 use Config::JSON;
+use MongoDB;
 use Data::Dumper;
 
 $| = 1;
 
-my $config = Config::JSON->new('t/LetsGoSmoke.conf');
+my $config = Config::JSON->new( '../conf/LetsGoSmoke.conf' );
+my $mongoClient = Mongo::MongoClient->new( %{ $config->get('mongodb') } );
 
 my $socket = IO::Socket::INET->new(
     LocalPort   => '5000',
@@ -23,7 +25,7 @@ my $socket = IO::Socket::INET->new(
     Listen      => 10,
 ) or die "Error in socket creation: $!\n";
 
-my $letsGoSmoke = LetsGoSmoke->new( config => $config );
+my $letsGoSmoke = LetsGoSmoke->new( dbClient => $mongoClient );
 
 while ( 1 ) {
     my $client_socket = $socket->accept();

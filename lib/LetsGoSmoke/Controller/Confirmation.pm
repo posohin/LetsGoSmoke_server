@@ -5,10 +5,10 @@ use namespace::autoclean;
 
 extends 'LetsGoSmoke::Controller::Base';
 
-#get request info (from to message)
+#get request info (from to message) via construct object
 #set confirmation status
 #response user ok or fail
-#send offer's users new confirmation status
+#send @to users notification of confirmation status
 
 __PACKAGE__->meta->make_immutable;
 

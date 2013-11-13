@@ -6,6 +6,11 @@ use Moose;
 use namespace::autoclean;
 
 use LetsGoSmoke::Model::Users;
+use LetsGoSmoke::Model::Status;
+use LetsGoSmoke::Controller::Status;
+use LetsGoSmoke::Controller::Offer;
+use LetsGoSmoke::Controller::Confirmation;
+
 use JSON;
 
 has 'dbClient' => (
@@ -49,36 +54,32 @@ has 'controller' => (
     clearer     => '_clear_controller',
 );
 
-has 'model' => (
-    is          => 'ro',
-    isa         => 'LetsGoSmoke::Model::Base',
-    writer      => '_set_model',
-    clearer     => '_clear_model',
-);
+sub processRequest {
+    my $self = shift;
 
-#set requestMessage, connectionInfo
-#processRequest {
-#parse requestMessage
-#process request by controller
-#get response
-#}
-#parse requestMessage{
-# get userModel (userModel creates or check user)
-# choose controller
-#}
+    $self->parseRequestMessage();
+    my $response = $self->controller->processRequest();
 
+    return $response;
+}
 
 sub parseRequestMessage {
     my $self = shift;
 
+    $self->clear_temp_vars;
+
     my $request = from_json( $self->requestMessage );
     my $userModel = LetsGoSmoke::Model::Users->new( dbClient => $self->dbClient );
+
+    #set 'from' user
     my $from = userModel->find(
         username => $request->{from},
         host => $self->connectionInfo->{host},
         port => $self->connectionInfo->{port},
-    );
+    ); #get new or exists user hashref
     $self->set_from( $from );
+
+    #set 'to' users
     if ( defined $request->{to} and ref $request->{to} eq "ARRAY" ) {
         my @to = ();
         foreach my $username ( @{ $request->{to} } ) {
@@ -87,26 +88,36 @@ sub parseRequestMessage {
         }
         self->set_to( \@to );
     } elsif ( defined $request->{to} and ref $request->{to} eq "SCALAR" ) {
-        my $to = userModel->get( username => $username );
+        my $to = userModel->get( username => $username ); #get user hashref
         $self->set_to( [$to] );
     }
-#choose controller
-}
 
-sub processRequest {
-    #return response message
-}
-
-sub _before_build {
-    #create MongoDB::MongoClient
-}
-
-sub set_message {
-    my $self = shift;
-
-    $self->clear_temp_vars;
-    #parse request message, set attributes from, to
-    #set request type
+    #choose handler
+    if ( exists $request->{request}->{status} ) {
+        $self->set_controller( LetsGoSmoke::Controller::Status->new(
+                from => $self->from,
+                to => $self->to,
+                request => $request->{request},
+                dbClient => $self->dbClient,
+            )
+        );
+    } elsif ( exists $request->{request}->{offer} ) {
+        $self->set_controller( LetsGoSmoke::Controller::Offer->new(
+                from => $self->from,
+                to => $self->to,
+                request => $request->{request},
+                dbClient => $self->dbClient,
+            )
+        );
+    } elsif ( exists $request->{request}->{confirmation} ) {
+        $self->set_controller( LetsGoSmoke::Controller::Confirmation->new(
+                from => $self->from,
+                to => $self->to,
+                request => $request->{request},
+                dbClient => $self->dbClient,
+            )
+        );
+    }
 }
 
 sub clear_temp_vars {
@@ -117,7 +128,6 @@ sub clear_temp_vars {
     $self->clear_requestMessage;
     $self->clear_connectionInfo;
     $self->clear_controller;
-    $self->clear_model;
 }
 
 __PACKAGE__->meta->make_immutable;

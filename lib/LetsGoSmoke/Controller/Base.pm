@@ -6,33 +6,33 @@ use namespace::autoclean;
 use LetsGoSmoke::Controller::Send;
 
 has 'from' => (
-    is => 'ro',
-    isa => 'HashRef',
-    required => 1,
+    is          => 'ro',
+    isa         => 'HashRef',
+    required    => 1,
 );
 
 has 'to' => (
-    is => 'ro',
-    isa => 'ArrayRef[HashRef]',
-    required => 1,
+    is          => 'ro',
+    isa         => 'ArrayRef[HashRef]',
+    required    => 1,
 );
 
 has 'request' => (
-    is => 'ro',
-    isa => 'HashRef',
-    required => 1,
+    is          => 'ro',
+    isa         => 'HashRef',
+    required    => 1,
+);
+
+has 'dbClient' => (
+    is          => 'ro',
+    isa         => 'MongoDB::MongoClient',
+    required    => 1,
 );
 
 has 'notification' => (
-    is => 'ro',
-    isa => 'HashRef',
-    writer => '_set_notification',
-);
-
-has 'model' => (
-    is => 'ro',
-    isa => 'LetsGoSmoke::Model',
-    required => 1,
+    is          => 'ro',
+    isa         => 'HashRef',
+    writer      => '_set_notification',
 );
 
 #process request {
@@ -46,9 +46,9 @@ has 'model' => (
 sub processRequest {
     my $self = shift;
 
-    $self->set_notification( $self->model->getNotification() );
+    $self->set_notification( undef );
 
-    return $self->model->set( request => $self->request ) ? 1 : 0;
+    return 'Ok, query type you requested, does not exist.';
 }
 
 after 'processRequest' => sub {
@@ -57,9 +57,9 @@ after 'processRequest' => sub {
     my $sender = LetsGoSmoke::Controller::Send->new(
         from => $self->from,
         to => $self->to,
-        notification => $self->notification
+        notification => $self->notification,
     );
-    $sender->sendNotifications();
+    $sender->sendNotification();
 }
 
 __PACKAGE__->meta->make_immutable;

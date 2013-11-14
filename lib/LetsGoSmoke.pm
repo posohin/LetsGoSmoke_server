@@ -15,7 +15,7 @@ use JSON;
 
 has 'dbClient' => (
     is          => 'ro',
-    isa         => 'MongoDB::MongoClient',
+    isa         => 'MongoDB::Database',
     required    => 1,
 );
 
@@ -49,7 +49,7 @@ has 'to' => (
 
 has 'controller' => (
     is          => 'ro',
-    isa         => 'LetsGoSmoke::Controller::Base'
+    isa         => 'LetsGoSmoke::Controller'
     writer      => '_set_controller',
     clearer     => '_clear_controller',
 );
@@ -69,54 +69,40 @@ sub parseRequestMessage {
     $self->clear_temp_vars;
 
     my $request = from_json( $self->requestMessage );
-    my $userModel = LetsGoSmoke::Model::Users->new( dbClient => $self->dbClient );
+    my $usersModel = LetsGoSmoke::Model::Users->new( collection => $self->dbClient->get_collection( 'Users' ) );
 
     #set 'from' user
-    my $from = userModel->find(
-        username => $request->{from},
-        host => $self->connectionInfo->{host},
-        port => $self->connectionInfo->{port},
+    my $from = $usersModel->get(
+        username    => $request->{from},
+        host        => $self->connectionInfo->{host},
+        port        => $self->connectionInfo->{port},
     ); #get new or exists user hashref
     $self->set_from( $from );
 
     #set 'to' users
-    if ( defined $request->{to} and ref $request->{to} eq "ARRAY" ) {
+    if ( exists $request->{to} ) {
         my @to = ();
         foreach my $username ( @{ $request->{to} } ) {
-            my $userModel = userModel->get( username => $username );
-            push @to, $userModel if defined userModel;
+            my $user = $usersModel->find( username => $username );
+            push @to, $user if defined $user;
         }
         self->set_to( \@to );
-    } elsif ( defined $request->{to} and ref $request->{to} eq "SCALAR" ) {
-        my $to = userModel->get( username => $username ); #get user hashref
-        $self->set_to( [$to] );
     }
 
     #choose handler
+    my %controller_params = (
+        from        => $self->from,
+        to          => $self->to,
+        request     => $request->{request},
+        dbClient    => $self->dbClient,
+        usersModel  => $usersModel,
+    );
     if ( exists $request->{request}->{status} ) {
-        $self->set_controller( LetsGoSmoke::Controller::Status->new(
-                from => $self->from,
-                to => $self->to,
-                request => $request->{request},
-                dbClient => $self->dbClient,
-            )
-        );
+        $self->set_controller( LetsGoSmoke::Controller::Status->new( %controller_params ) );
     } elsif ( exists $request->{request}->{offer} ) {
-        $self->set_controller( LetsGoSmoke::Controller::Offer->new(
-                from => $self->from,
-                to => $self->to,
-                request => $request->{request},
-                dbClient => $self->dbClient,
-            )
-        );
+        $self->set_controller( LetsGoSmoke::Controller::Offer->new( %controller_params ) );
     } elsif ( exists $request->{request}->{confirmation} ) {
-        $self->set_controller( LetsGoSmoke::Controller::Confirmation->new(
-                from => $self->from,
-                to => $self->to,
-                request => $request->{request},
-                dbClient => $self->dbClient,
-            )
-        );
+        $self->set_controller( LetsGoSmoke::Controller::Confirmation->new( %controller_params ) );
     }
 }
 

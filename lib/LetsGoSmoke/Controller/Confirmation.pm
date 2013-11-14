@@ -10,6 +10,12 @@ extends 'LetsGoSmoke::Controller::Base';
 #response user ok or fail
 #send @to users notification of confirmation status
 
+override 'processRequest' => sub {
+    my $self = shift;
+
+    #
+}
+
 __PACKAGE__->meta->make_immutable;
 
 1;

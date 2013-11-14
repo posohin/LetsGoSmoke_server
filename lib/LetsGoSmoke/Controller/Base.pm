@@ -25,7 +25,13 @@ has 'request' => (
 
 has 'dbClient' => (
     is          => 'ro',
-    isa         => 'MongoDB::MongoClient',
+    isa         => 'MongoDB::Database',
+    required    => 1,
+);
+
+has 'usersModel' => (
+    is          => 'ro',
+    isa         => 'LetsGoSmoke::Model::Users',
     required    => 1,
 );
 
@@ -35,20 +41,12 @@ has 'notification' => (
     writer      => '_set_notification',
 );
 
-#process request {
-#set to db new state
-#return response to user
-#}
-#after process request {
-#send notification to users
-#}
-
 sub processRequest {
     my $self = shift;
 
     $self->set_notification( undef );
 
-    return 'Ok, query type you requested, does not exist.';
+    return 'Ok, query type you requested does not exist.';
 }
 
 after 'processRequest' => sub {

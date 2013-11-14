@@ -14,11 +14,11 @@ use Data::Dumper;
 $| = 1;
 
 my $config = Config::JSON->new( '../conf/LetsGoSmoke.conf' );
-my $mongoClient = MongoDB::MongoClient->new( %{ $config->get('mongodb') } );
+my $dbClient = MongoDB::MongoClient->new( %{ $config->get('mongodb') } )->get_database( 'LetsGoSmoke' );
 
 my $socket = IO::Socket::INET->new( %{ $config->get('server') } ) or die "Error in socket creation: $!\n";
 
-my $letsGoSmoke = LetsGoSmoke->new( dbClient => $mongoClient );
+my $letsGoSmoke = LetsGoSmoke->new( dbClient => $dbClient );
 
 while ( 1 ) {
     my $client_socket = $socket->accept();

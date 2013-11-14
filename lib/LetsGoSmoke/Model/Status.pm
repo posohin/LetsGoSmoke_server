@@ -10,7 +10,7 @@ use Validate::Params qw(:all);
 sub getOnline {
     my $self = shift;
 
-    return $self->collectiont->find( { status => "1" } )->fileds( { username => 1, _id => 0 } )->all;
+    return $self->collectiont->find( { status => "1" } )->fields( { username => 1, _id => 0 } )->all;
 }
 
 sub setStatus {

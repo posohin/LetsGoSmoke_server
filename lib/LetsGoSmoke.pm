@@ -82,7 +82,7 @@ sub parseRequestMessage {
     #set 'to' users
     if ( exists $request->{to} ) {
         my @to = ();
-        foreach my $username ( @{ $request->{to} } ) {
+        foreach my $username ( @{ $request->{to} } ) { #deprecated
             my $user = $usersModel->find( username => $username );
             push @to, $user if defined $user;
         }

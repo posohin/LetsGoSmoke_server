@@ -7,11 +7,6 @@ extends 'LetsGoSmoke::Controller::Base';
 
 use LetsGoSmoke::Model::Status;
 
-#get request info (from to message) via construct object
-#set new status, get model and add
-#response to user ok or fail
-#send online users notification of new status
-
 override 'processRequest' => sub {
     my $self = shift;
 

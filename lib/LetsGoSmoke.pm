@@ -80,13 +80,9 @@ sub parseRequestMessage {
     $self->set_from( $from );
 
     #set 'to' users
-    if ( exists $request->{to} ) {
-        my @to = ();
-        foreach my $username ( @{ $request->{to} } ) { #deprecated
-            my $user = $usersModel->find( username => $username );
-            push @to, $user if defined $user;
-        }
-        self->set_to( \@to );
+    if ( exists $request->{to} and scalar @{ $request->{to} } != 0 ) {
+        my $to = $usersModel->find( usernames => $request->{to} );
+        self->set_to( $to );
     }
 
     #choose handler

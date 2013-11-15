@@ -12,6 +12,7 @@ use LetsGoSmoke::Controller::Offer;
 use LetsGoSmoke::Controller::Confirmation;
 
 use JSON;
+use Data::Dumper;
 
 has 'dbClient' => (
     is          => 'ro',
@@ -49,7 +50,7 @@ has 'to' => (
 
 has 'controller' => (
     is          => 'ro',
-    isa         => 'LetsGoSmoke::Controller'
+    isa         => 'LetsGoSmoke::Controller::Status|LetsGoSmoke::Controller::Offer|LetsGoSmoke::Controller::Confirmation',
     writer      => '_set_controller',
     clearer     => '_clear_controller',
 );
@@ -66,8 +67,6 @@ sub processRequest {
 sub parseRequestMessage {
     my $self = shift;
 
-    $self->clear_temp_vars;
-
     my $request = from_json( $self->requestMessage );
     my $usersModel = LetsGoSmoke::Model::Users->new( collection => $self->dbClient->get_collection( 'Users' ) );
 
@@ -77,39 +76,41 @@ sub parseRequestMessage {
         host        => $self->connectionInfo->{host},
         port        => $self->connectionInfo->{port},
     ); #get new or exists user hashref
-    $self->set_from( $from );
+    $self->_set_from( $from );
 
     #set 'to' users
     if ( exists $request->{to} and scalar @{ $request->{to} } != 0 ) {
         my $to = $usersModel->find( usernames => $request->{to} );
-        self->set_to( $to );
+        warn Dumper $to;
+        self->_set_to( $to );
     }
 
     #choose handler
     my %controller_params = (
         from        => $self->from,
-        to          => $self->to,
         request     => $request->{request},
         dbClient    => $self->dbClient,
         usersModel  => $usersModel,
     );
     if ( exists $request->{request}->{status} ) {
-        $self->set_controller( LetsGoSmoke::Controller::Status->new( %controller_params ) );
+        $self->_set_controller( LetsGoSmoke::Controller::Status->new( %controller_params ) );
     } elsif ( exists $request->{request}->{offer} ) {
-        $self->set_controller( LetsGoSmoke::Controller::Offer->new( %controller_params ) );
+        $controller_params{to} = $self->to;
+        $self->_set_controller( LetsGoSmoke::Controller::Offer->new( %controller_params ) );
     } elsif ( exists $request->{request}->{confirmation} ) {
-        $self->set_controller( LetsGoSmoke::Controller::Confirmation->new( %controller_params ) );
+        $controller_params{to} = $self->to;
+        $self->_set_controller( LetsGoSmoke::Controller::Confirmation->new( %controller_params ) );
     }
 }
 
 sub clear_temp_vars {
     my $self = shift;
 
-    $self->clear_from;
-    $self->clear_to;
-    $self->clear_requestMessage;
-    $self->clear_connectionInfo;
-    $self->clear_controller;
+    $self->_clear_from;
+    $self->_clear_to;
+    $self->_clear_requestMessage;
+    $self->_clear_connectionInfo;
+    $self->_clear_controller;
 }
 
 __PACKAGE__->meta->make_immutable;

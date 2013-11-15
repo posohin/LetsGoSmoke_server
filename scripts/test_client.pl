@@ -5,6 +5,7 @@ use strict;
 
 use IO::Socket::INET;
 use Data::Dumper;
+use JSON;
 
 $| = 1;
 
@@ -16,12 +17,17 @@ Proto => 'tcp',
 
 warn "TCP Connection Success.\n";
 
-my $data;
-$socket->recv($data, 1024);
-warn Dumper $data;
-
-$data = '{"type":"simple_client_answer"}';
-$socket->send($data);
-
-sleep (10);
-$socket->close();
+my $data = {
+    from => "test_client",
+    request => {
+        status => 1,
+    },
+};
+my $message = to_json($data);
+#$socket->recv($data, 1024);
+#warn Dumper $data;
+warn Dumper $message;
+$socket->send($message);
+my $response = undef;
+$socket->recv($response, 1024);
+warn Dumper $response;

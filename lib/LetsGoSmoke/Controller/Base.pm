@@ -14,7 +14,7 @@ has 'from' => (
 has 'to' => (
     is          => 'ro',
     isa         => 'ArrayRef[HashRef]',
-    required    => 1,
+    writer      => 'set_to',
 );
 
 has 'request' => (
@@ -58,7 +58,7 @@ after 'processRequest' => sub {
         notification => $self->notification,
     );
     $sender->sendNotification();
-}
+};
 
 __PACKAGE__->meta->make_immutable;
 

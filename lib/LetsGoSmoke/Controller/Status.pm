@@ -7,6 +7,8 @@ extends 'LetsGoSmoke::Controller::Base';
 
 use LetsGoSmoke::Model::Status;
 
+use Data::Dumper;
+
 override 'processRequest' => sub {
     my $self = shift;
 
@@ -18,14 +20,15 @@ override 'processRequest' => sub {
         username    => $self->from->{username},
         status      => $self->request->{status}
     );
-    my @onlines = map { $_->{username} } $status->getOnline();
-    my $to = LetsGoSmoke::Model::Users->find( usernames => \@onlines );
+    my @onlines = map { $_->{username} } @{ $status->getOnline() };
+    my $to = $self->usersModel->find( usernames => \@onlines );
+    warn Dumper $to;
     $self->set_to( $to );
 
-    $self->set_notification( message => $self->request->{status}, type => "status" );
+    $self->_set_notification( $self->request );
 
     return "Ok";
-}
+};
 
 __PACKAGE__->meta->make_immutable;
 

@@ -16,6 +16,8 @@ my $build = Module::Build->new(
         'Config::JSON'              => '1.5100',
         'JSON'                      => '2.90',
         'namespace::autoclean'      => '0.14',
+        'Params::Validate'          => '1.08',
+        'MongoDB::MongoClient'      => '0.702.2',
     },
     requires_build  => {
         'Module::Build' => '0.3800',

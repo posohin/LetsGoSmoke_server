@@ -44,7 +44,8 @@ sub find {
     my $self = shift;
     my %params = validate(@_, { usernames => { type => ARRAYREF } });
 
-    return $self->collection->find( { username => { '$in' => $params{usernames} } } )->all;
+    my @users = $self->collection->find( { username => { '$in' => $params{usernames} } } )->all;
+    return \@users;
 }
 
 __PACKAGE__->meta->make_immutable;

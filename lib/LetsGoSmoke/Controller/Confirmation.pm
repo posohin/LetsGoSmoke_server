@@ -14,7 +14,7 @@ override 'processRequest' => sub {
     my $self = shift;
 
     #
-}
+};
 
 __PACKAGE__->meta->make_immutable;
 

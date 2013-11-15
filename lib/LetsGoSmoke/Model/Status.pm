@@ -5,12 +5,16 @@ use namespace::autoclean;
 
 extends 'LetsGoSmoke::Model::Base';
 
-use Validate::Params qw(:all);
+use Params::Validate qw(:all);
+use Data::Dumper;
 
 sub getOnline {
     my $self = shift;
 
-    return $self->collectiont->find( { status => "1" } )->fields( { username => 1, _id => 0 } )->all;
+    my @onlines = $self->collection->find( { status => "1" } )->fields( { username => 1, _id => 0 } )->all;
+    warn Dumper \@onlines;
+
+    return \@onlines;
 }
 
 sub setStatus {

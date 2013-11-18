@@ -37,11 +37,14 @@ sub sendNotification {
             PeerPort => $user->{port},
             Proto => 'tcp',
         ) or die "ERROR in Socket Creation : $!\n";
+        $socket->close();
     }
 }
 
 sub composeMessage {
     my $self = shift;
+
+    return undef;
 }
 
 __PACKAGE__->meta->make_immutable;

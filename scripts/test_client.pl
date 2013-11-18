@@ -11,7 +11,9 @@ $| = 1;
 
 my $socket = new IO::Socket::INET (
 PeerHost => '127.0.0.1',
-PeerPort => '5000',
+PeerPort => 5000,
+#LocalPort => 5002,
+LocalHost => '10.15.8.11',
 Proto => 'tcp',
 ) or die "ERROR in Socket Creation : $!\n";
 

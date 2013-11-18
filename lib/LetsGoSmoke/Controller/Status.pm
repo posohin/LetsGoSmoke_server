@@ -7,24 +7,28 @@ extends 'LetsGoSmoke::Controller::Base';
 
 use LetsGoSmoke::Model::Status;
 
-use Data::Dumper;
-
 override 'processRequest' => sub {
     my $self = shift;
 
+    #new status model
     my $status = LetsGoSmoke::Model::Status->new(
         collection => $self->dbClient->get_collection( 'Status' ),
     );
+    #set 'from' user
     $status->set_from( $self->from );
+    #set new status to 'from' user
     $status->setStatus(
-        username    => $self->from->{username},
-        status      => $self->request->{status}
+        status  => $self->request->{status}
     );
-    my @onlines = map { $_->{username} } @{ $status->getOnline() };
-    my $to = $self->usersModel->find( usernames => \@onlines );
-    warn Dumper $to;
+
+    #get online users list
+    my $onlines =  $status->getOnline();
+    #get online users models
+    my $to = $self->usersModel->find( userlist => $onlines );
+    #set to controller 'to' users
     $self->set_to( $to );
 
+    #set notification
     $self->_set_notification( $self->request );
 
     return "Ok";

@@ -6,7 +6,6 @@ use Moose;
 use namespace::autoclean;
 
 use LetsGoSmoke::Model::Users;
-use LetsGoSmoke::Model::Status;
 use LetsGoSmoke::Controller::Status;
 use LetsGoSmoke::Controller::Offer;
 use LetsGoSmoke::Controller::Confirmation;
@@ -80,8 +79,7 @@ sub parseRequestMessage {
 
     #set 'to' users
     if ( exists $request->{to} and scalar @{ $request->{to} } != 0 ) {
-        my $to = $usersModel->find( usernames => $request->{to} );
-        warn Dumper $to;
+        my $to = $usersModel->find( userlist => $request->{to} );
         self->_set_to( $to );
     }
 

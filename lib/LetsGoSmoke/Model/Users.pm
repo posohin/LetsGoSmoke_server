@@ -1,40 +1,33 @@
 package LetsGoSmoke::Model::Users;
 
 use Moose;
+use MooseX::Params::Validate;
 use namespace::autoclean;
 
 extends 'LetsGoSmoke::Model::Base';
 
-use Params::Validate qw/:all/;
-
-has 'collection' => (
-    is => 'ro',
-    isa => 'MongoDB::Collection',
-    required => 1,
-);
-
 sub get {
     my $self = shift;
-    my %params = validate( @_, {
-        username    => { type => SCALAR },
-        host        => { type => SCALAR },
-        port        => { type => SCALAR },
-    });
+    my %params = validated_hash(
+        \@_,
+        username    => { isa => 'Str' },
+        host        => { isa => 'Str' },
+        port        => { isa => 'Str' }
+    );
+
     my $user = $self->collection->find_one( { username => $params{username} } );
     if ( !defined $user or ( $params{host} ne $user->{host} or $params{port} != $user->{port} ) ) {
-        $self->collection->update(
-            { username => $params{username} },
-            { '$set' => {
-                host => $params{host},
-                port => $params{port}
-            }},
-            { upsert => 1 }
-        );
-        $user = {
+        my %updating_params = (
             username    => $params{username},
             host        => $params{host},
             port        => $params{port},
-        };
+        );
+        $self->collection->update(
+            { username => $params{username} },
+            { '$set' => \%updating_params },
+            { upsert => 1 }
+        );
+        $user = {%$user, %updating_params};
     }
 
     return $user;
@@ -42,9 +35,13 @@ sub get {
 
 sub find {
     my $self = shift;
-    my %params = validate(@_, { usernames => { type => ARRAYREF } });
+    my %params = validated_hash(
+        \@_,
+        userlist => { isa => 'ArrayRef' }
+    );
 
-    my @users = $self->collection->find( { username => { '$in' => $params{usernames} } } )->all;
+    my @users = $self->collection->find( { username => { '$in' => $params{userlist} } } )->all;
+
     return \@users;
 }
 

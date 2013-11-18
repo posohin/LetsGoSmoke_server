@@ -22,7 +22,7 @@ warn "TCP Connection Success.\n";
 my $data = {
     from => "test_client",
     request => {
-        status => 1,
+        status => "Hello, world!",
     },
 };
 my $message = to_json($data);

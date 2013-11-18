@@ -21,13 +21,23 @@ sub setStatus {
         status  => { isa => 'Str' }
     );
 
-    $self->collection->update(
-        { username => $self->from->{username} },
-        { '$set' => { status => $params{status} } },
-        { upsert => 1 }
-    );
+    my $status = undef;
+    if ( $params{status} =~ /^Hello,\s+world!$/ ) {
+        $status = 1;
+    } elsif ( $params{status} =~ /^Good\s+bye$/ ) {
+        $status = 0;
+    }
 
-    return "Ok";
+    if ( defined $status ) {
+        $self->collection->update(
+            { username => $self->from->{username} },
+            { '$set' => { status => $status } },
+            { upsert => 1 }
+        );
+        return undef;
+    } else {
+        return 1;
+    }
 }
 
 __PACKAGE__->meta->make_immutable;

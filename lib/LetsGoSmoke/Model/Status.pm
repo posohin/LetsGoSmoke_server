@@ -6,7 +6,7 @@ use namespace::autoclean;
 
 extends 'LetsGoSmoke::Model::Base';
 
-sub getOnline {
+sub getOnlines {
     my $self = shift;
 
     my @onlines = map { $_->{username} ne $self->from->{username} ? $_->{username} : () } $self->collection->find( { status => 1 } )->all;
@@ -34,9 +34,9 @@ sub setStatus {
             { '$set' => { status => $status } },
             { upsert => 1 }
         );
-        return undef;
-    } else {
-        return 1;
+        my $onlines = $self->getOnlines();
+
+        return $onlines;
     }
 }
 

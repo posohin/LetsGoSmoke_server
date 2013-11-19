@@ -43,8 +43,6 @@ while ( 1 ) {
 
     my $data = undef;
 
-#    $client_socket->send( $data );
-
     $client_socket->recv( $data, 1024 );
     warn Dumper $data;
     $letsGoSmoke->set_requestMessage( $data );

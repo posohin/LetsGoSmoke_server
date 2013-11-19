@@ -47,6 +47,13 @@ has 'to' => (
     clearer     => '_clear_to',
 );
 
+has 'request' => (
+    is          => 'ro',
+    isa         => 'HashRef',
+    writer      => '_set_request',
+    clearer     => '_clear_request',
+);
+
 has 'controller' => (
     is          => 'ro',
     isa         => 'LetsGoSmoke::Controller::Status|LetsGoSmoke::Controller::Offer|LetsGoSmoke::Controller::Confirmation',
@@ -58,7 +65,11 @@ sub processRequest {
     my $self = shift;
 
     $self->parseRequestMessage();
-    my $response = $self->controller->processRequest();
+    my $response = to_json({
+        to      => $self->controller->processRequest(),
+        from    => $self->from->{username},
+        request => $self->request->{request},
+    });
 
     return $response;
 }
@@ -66,36 +77,36 @@ sub processRequest {
 sub parseRequestMessage {
     my $self = shift;
 
-    my $request = from_json( $self->requestMessage );
+    $self->_set_request( from_json( $self->requestMessage ) );
     my $usersModel = LetsGoSmoke::Model::Users->new( collection => $self->dbClient->get_collection( 'Users' ) );
 
     #set 'from' user
     my $from = $usersModel->get(
-        username    => $request->{from},
+        username    => $self->request->{from},
         host        => $self->connectionInfo->{host},
         port        => $self->connectionInfo->{port},
-    ); #get new or exists user hashref
+    );
     $self->_set_from( $from );
 
     #set 'to' users
-    if ( exists $request->{to} and scalar @{ $request->{to} } != 0 ) {
-        my $to = $usersModel->find( userlist => $request->{to} );
+    if ( exists $self->request->{to} and scalar @{ $self->request->{to} } != 0 ) {
+        my $to = $usersModel->find( userlist => $self->request->{to} );
         self->_set_to( $to );
     }
 
     #choose handler
     my %controller_params = (
         from        => $self->from,
-        request     => $request->{request},
+        request     => $self->request->{request},
         dbClient    => $self->dbClient,
         usersModel  => $usersModel,
     );
-    if ( exists $request->{request}->{status} ) {
+    if ( exists $self->request->{request}->{status} ) {
         $self->_set_controller( LetsGoSmoke::Controller::Status->new( %controller_params ) );
-    } elsif ( exists $request->{request}->{offer} ) {
+    } elsif ( exists $self->request->{request}->{offer} ) {
         $controller_params{to} = $self->to;
         $self->_set_controller( LetsGoSmoke::Controller::Offer->new( %controller_params ) );
-    } elsif ( exists $request->{request}->{confirmation} ) {
+    } elsif ( exists $self->request->{request}->{confirmation} ) {
         $controller_params{to} = $self->to;
         $self->_set_controller( LetsGoSmoke::Controller::Confirmation->new( %controller_params ) );
     }
@@ -106,6 +117,7 @@ sub clear_temp_vars {
 
     $self->_clear_from;
     $self->_clear_to;
+    $self->_clear_request;
     $self->_clear_requestMessage;
     $self->_clear_connectionInfo;
     $self->_clear_controller;

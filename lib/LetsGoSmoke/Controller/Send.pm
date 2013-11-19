@@ -25,9 +25,6 @@ has 'notification' => (
     required => 1,
 );
 
-#get destination info
-#get message
-#compose and send message @to users via socket
 sub sendNotification {
     my $self = shift;
 
@@ -37,8 +34,8 @@ sub sendNotification {
             PeerHost => $user->{host},
             PeerPort => $user->{port},
             Proto => 'tcp',
-        ) or warn "ERROR in Socket Creation : $!\n", next;
-        $socket->send($message);
+        ) or warn("ERROR in Socket Creation : $!\n"), next;
+        $socket->send( $message );
         $socket->close();
     }
 }
@@ -46,7 +43,10 @@ sub sendNotification {
 sub composeMessage {
     my $self = shift;
 
-    my $data = {from => $self->from->{username}, request => $self->notification};
+    my $data = {
+        from    => $self->from->{username},
+        request => $self->notification
+    };
     my $message = to_json($data);
 
     return $message;

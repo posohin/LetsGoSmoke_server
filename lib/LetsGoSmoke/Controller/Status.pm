@@ -6,6 +6,7 @@ use namespace::autoclean;
 extends 'LetsGoSmoke::Controller::Base';
 
 use LetsGoSmoke::Model::Status;
+use Data::Dumper;
 
 override 'processRequest' => sub {
     my $self = shift;
@@ -18,7 +19,7 @@ override 'processRequest' => sub {
     $status->set_from( $self->from );
     #set new status to 'from' user
     my $error = $status->setStatus(
-        status  => $self->request->{status}
+        status => $self->request->{status}
     );
 
     unless ( defined $error ) {
@@ -29,8 +30,12 @@ override 'processRequest' => sub {
         #set to controller 'to' users
         $self->set_to( $to );
 
-        #set notification
-        $self->_set_notification( $self->request );
+        my $sender = LetsGoSmoke::Controller::Send->new(
+            from => $self->from,
+            to => $self->to,
+            notification => $self->request,
+        );
+        $sender->sendNotification();
 
         return "Status successfully updated";
     } else {

@@ -9,7 +9,7 @@ extends 'LetsGoSmoke::Model::Base';
 sub getOnline {
     my $self = shift;
 
-    my @onlines = map { $_->{username} } $self->collection->find( { status => "1" } )->all;
+    my @onlines = map { $_->{username} ne $self->from->{username} ? $_->{username} : () } $self->collection->find( { status => 1 } )->all;
 
     return \@onlines;
 }

@@ -5,6 +5,7 @@ use namespace::autoclean;
 
 use JSON;
 use IO::Socket::INET;
+use Data::Dumper;
 
 has 'from' => (
     is => 'ro',
@@ -36,7 +37,8 @@ sub sendNotification {
             PeerHost => $user->{host},
             PeerPort => $user->{port},
             Proto => 'tcp',
-        ) or die "ERROR in Socket Creation : $!\n";
+        ) or warn "ERROR in Socket Creation : $!\n", next;
+        $socket->send($message);
         $socket->close();
     }
 }
@@ -44,7 +46,10 @@ sub sendNotification {
 sub composeMessage {
     my $self = shift;
 
-    return undef;
+    my $data = {from => $self->from->{username}, request => $self->notification};
+    my $message = to_json($data);
+
+    return $message;
 }
 
 __PACKAGE__->meta->make_immutable;
